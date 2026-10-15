@@ -202,7 +202,7 @@ SR.demo = function () {
 (function () {
 'use strict';
 var SR = window.SR, U = SR.u, $ = U.$, $$ = U.$$, esc = U.esc, num = U.num, fm = U.fm, f0 = U.f0, fd = U.fd, r2 = U.r2;
-var ui = { v: 'day', date: U.todayStr(), rep: 'daily', rdate: '', q: '', confirm: '', pending: null };
+var ui = { v: 'day', date: U.todayStr(), rep: 'daily', rdate: '', from: '', to: '', q: '', confirm: '', pending: null };
 var cur = null, curKind = '', lastTbl = null, C = null;
 var DAYF = ['cash', 'misc', 'other', 'bf', 'cf', 'hc', 'cu', 'cr', 'tng', 'am', 'ah'];
 var TYPES = { online: 'Online collection 网上收款', chqdep: 'Cheque deposit 支票存入', cashdep: 'Cash deposit 现金存入', other: 'Other deposit 其他存入', wd: 'Withdrawal 提取' };
@@ -443,7 +443,13 @@ var REPNAME = { sc: 'Sales & Collection 每日销售与收款', daily: 'Sales & 
 function vReports() {
   var h = '<div class="seg sc nopr">' + REPS.map(function (r) { return '<button data-rep="' + r[0] + '" class="' + (ui.rep === r[0] ? 'on' : '') + '">' + r[1] + '</button>'; }).join('') + '</div>' +
     '<div class="pronly"><h2>' + REPNAME[ui.rep] + '</h2></div>';
-  var days = C.days, R = [];
+  var inR = function (d) { return (!ui.from || d >= ui.from) && (!ui.to || d <= ui.to); };
+  var days = C.days.filter(function (x) { return inR(x.date); }), R = [];
+  if (ui.rep === 'daily' || ui.rep === 'flow' || ui.rep === 'ar' || ui.rep === 'bank') {
+    h += '<div class="card nopr" style="gap:6px"><div class="mh">Date 日期</div><div class="row"><label class="f">From 从<input type="date" id="rfrom" value="' + ui.from + '"></label><label class="f">To 到<input type="date" id="rto" value="' + ui.to + '"></label></div>' +
+      '<div class="row"><button class="btn small quiet" data-rng="day">' + fd(ui.date) + ' (Today page 今日页)</button><button class="btn small quiet" data-rng="month">This month 本月</button><button class="btn small quiet" data-rng="all">All 全部</button></div>' +
+      '<p class="hint">' + (ui.from || ui.to ? 'Showing 显示: ' + (ui.from ? fd(ui.from) : 'start') + ' → ' + (ui.to ? fd(ui.to) : 'latest') : 'Showing all dates 显示所有日期') + '</p></div>';
+  }
   if (ui.rep === 'daily') {
     var A = ui.after !== false;
     h += '<div class="seg nopr"><button data-aft="1" class="' + (A ? 'on' : '') + '">After 调整后</button><button data-aft="0" class="' + (!A ? 'on' : '') + '">Before 调整前</button></div>';
@@ -466,7 +472,7 @@ function vReports() {
     R.push(['TOTAL 总计'].concat(T.map(function (v) { return fm(r2(v)); })));
     h += tbl(['Buyer 买家', 'Opening', 'Credit sales', 'Collections', 'Online', 'Discount', 'Balance owing'], R, { go: 1, t: [0], tot: 1, attr: function (i) { return bs[i] ? 'data-stmt="' + bs[i].id + '"' : ''; } });
   } else if (ui.rep === 'dd') {
-    var dt = ui.rdate || (days.length ? days[days.length - 1].date : U.todayStr());
+    var dt = ui.rdate || ui.date;
     h += '<div class="row nopr"><input type="date" id="rdsel" value="' + dt + '"></div>';
     var T2 = [0, 0, 0, 0, 0, 0, 0];
     SR.sortedBuyers().forEach(function (b) {
@@ -485,9 +491,9 @@ function vReports() {
     S().bank.forEach(function (b, i) { var bu = b.buyer ? SR.buyerById(b.buyer) : null, d = b.type === 'wd' ? 0 : b.amt; if (flag && b.type === 'online' && b.buyer) d = U.tr(d); rows.push({ k: U.dn(b.date) + i / 1e5, date: b.date, desc: b.desc || '', type: TYPES[b.type], buyer: bu ? bn(bu) : '', u: b.type === 'chqdep' ? f0(b.units) : '', dep: d, wd: b.type === 'wd' ? b.amt : 0, id: b.id, kind: 'b' }); });
     S().deb.forEach(function (e, i) { if (e.type === 'coll' && e.mode === 'chq' && e.bankin && SR.buyerById(e.buyer)) rows.push({ k: U.dn(e.bankin) + 0.5 + i / 1e5, date: e.bankin, desc: 'Buyer cheque banked 买家支票存入', type: 'Cheque deposit 支票存入 (buyer)', buyer: bn(SR.buyerById(e.buyer)), u: '1', dep: flag ? U.tr(e.amt) : e.amt, wd: 0, id: e.id, kind: 'e' }); });
     rows.sort(function (a, b) { return a.k - b.k; });
-    var bal = S().ob.bank; R.push(['', 'Opening balance 期初', '', '', '', '', '', fm(bal)]);
-    rows.forEach(function (r) { bal = r2(bal + r.dep - r.wd); R.push([fd(r.date), r.desc, r.type, r.buyer, r.u, r.dep ? fm(r.dep) : '', r.wd ? fm(r.wd) : '', fm(bal)]); });
-    h += tbl(['Date 日期', 'Description', 'Type', 'Buyer', 'Chq', 'Deposit 存入', 'Withdrawal 提取', 'Balance 余额'], R, { t: [1, 2, 3], go: 1, attr: function (i) { var r = rows[i - 1]; return r ? (r.kind === 'b' ? 'data-bnk="' + r.id + '"' : 'data-ent="' + r.id + '"') : ''; } });
+    var bal = S().ob.bank, started = !ui.from, SH = []; if (started) { R.push(['', 'Opening balance 期初', '', '', '', '', '', fm(bal)]); SH.push(null); }
+    rows.forEach(function (r) { if (!started && r.date >= ui.from) { started = true; R.push(['', 'Balance b/f 上期结余', '', '', '', '', '', fm(bal)]); SH.push(null); } bal = r2(bal + r.dep - r.wd); if (!inR(r.date)) return; SH.push(r); R.push([fd(r.date), r.desc, r.type, r.buyer, r.u, r.dep ? fm(r.dep) : '', r.wd ? fm(r.wd) : '', fm(bal)]); });
+    h += tbl(['Date 日期', 'Description', 'Type', 'Buyer', 'Chq', 'Deposit 存入', 'Withdrawal 提取', 'Balance 余额'], R, { t: [1, 2, 3], go: 1, attr: function (i) { var r = SH[i]; return r ? (r.kind === 'b' ? 'data-bnk="' + r.id + '"' : 'data-ent="' + r.id + '"') : ''; } });
     h += '<p class="hint nopr">TNG is added to bank balance on the Cash flow report 银行余额(现金流)另加TNG收款.</p>';
   } else if (ui.rep === 'chq') {
     var list = S().deb.filter(function (e) { return e.type === 'coll' && e.mode === 'chq' && !e.bankin && SR.buyerById(e.buyer); }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
@@ -518,7 +524,7 @@ function vSetup() {
   if (ui.pending) h += '<div class="chk bad"><b>File has ' + ui.pending.days.length + ' days, ' + ui.pending.buyers.length + ' buyers, ' + ui.pending.deb.length + ' entries.</b><span>This will REPLACE everything on this phone 会取代这部手机所有数据</span></div><button class="btn sure" data-act="restore">Replace all with this file 确认还原</button><button class="btn quiet" data-act="cancelrestore">Cancel 取消</button>';
   h += '</div>';
   var empty = !st.days.length && !st.buyers.length && !st.deb.length && !st.bank.length;
-  h += '<div class="card"><div class="mh">More 其他</div><p class="hint">Version 版本: v9 side-by-side + combined entry</p>' + (empty ? '<button class="btn quiet" data-act="demo">Load demo data 载入示范数据</button>' : '') +
+  h += '<div class="card"><div class="mh">More 其他</div><p class="hint">Version 版本: v10 report date range</p>' + (empty ? '<button class="btn quiet" data-act="demo">Load demo data 载入示范数据</button>' : '') +
     '<button class="btn quiet' + (ui.confirm === 'reset' ? ' sure' : '') + '" data-act="reset">' + (ui.confirm === 'reset' ? 'Tap again: ERASE EVERYTHING 再按一次:清除所有数据' : 'Erase all data 清除所有数据') + '</button></div>';
   return h;
 }
@@ -627,7 +633,7 @@ function act(a, el) {
 document.addEventListener('click', function (ev) {
   var t = ev.target;
   if (t.id === 'sheet') { closeSheet(); return; }
-  var el = t.closest ? t.closest('[data-act],[data-v],[data-es],[data-pick],[data-newb],[data-ent],[data-bnk],[data-stmt],[data-rep],[data-go],[data-drop],[data-aft]') : null; if (!el) return;
+  var el = t.closest ? t.closest('[data-act],[data-v],[data-es],[data-pick],[data-newb],[data-ent],[data-bnk],[data-stmt],[data-rep],[data-go],[data-drop],[data-aft],[data-rng]') : null; if (!el) return;
   if (el.hasAttribute('data-act')) return act(el.getAttribute('data-act'), el);
   if (el.hasAttribute('data-v')) return go(el.getAttribute('data-v'));
   if (el.hasAttribute('data-es')) { var kv2 = el.getAttribute('data-es').split(':'); cur[kv2[0]] = kv2[1]; return debSheet(); }
@@ -638,6 +644,7 @@ document.addEventListener('click', function (ev) {
   if (el.hasAttribute('data-stmt')) return stmtSheet(el.getAttribute('data-stmt'));
   if (el.hasAttribute('data-rep')) { ui.rep = el.getAttribute('data-rep'); return render(); }
   if (el.hasAttribute('data-go')) { ui.date = el.getAttribute('data-go'); return go('day'); }
+  if (el.hasAttribute('data-rng')) { var g = el.getAttribute('data-rng'); if (g === 'day') { ui.from = ui.to = ui.date; } else if (g === 'month') { ui.from = ui.date.slice(0, 8) + '01'; ui.to = ui.date.slice(0, 8) + '31'; } else { ui.from = ui.to = ''; } ui.rdate = ui.date; return render(); }
   if (el.hasAttribute('data-aft')) { ui.after = el.getAttribute('data-aft') === '1'; return render(); }
   if (el.hasAttribute('data-drop')) { S().ob.drop = +el.getAttribute('data-drop'); save(); return render(); }
 });
@@ -654,6 +661,8 @@ document.addEventListener('change', function (ev) {
   var t = ev.target;
   if (t.id === 'dsel') { if (t.value) { ui.date = t.value; render(); } }
   else if (t.id === 'rdsel') { ui.rdate = t.value; render(); }
+  else if (t.id === 'rfrom') { ui.from = t.value; render(); }
+  else if (t.id === 'rto') { ui.to = t.value; render(); }
   else if (t.id === 'rfile' && t.files && t.files[0]) {
     var fr = new FileReader(); fr.onload = function () { try { var o = JSON.parse(fr.result); if (!o || !Array.isArray(o.days)) throw 0; ui.pending = SR.norm(o); } catch (e) { ui.pending = null; alert2('This file is not a Sales Report backup 这不是备份文件'); } render(); };
     fr.readAsText(t.files[0]);
