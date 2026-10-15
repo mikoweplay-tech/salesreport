@@ -35,7 +35,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
 table { border-collapse: collapse; width: 100%; font-size: .82rem; } th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-family: var(--f-num); } th { background: var(--accent-soft); font-family: var(--f-body); font-size: .75rem; position: sticky; top: 0; }
 td:first-child, th:first-child { text-align: left; } td.t, th.t { text-align: left; font-family: var(--f-body); } tr.click { cursor: pointer; } tr.bad td { background: var(--bad-soft); color: var(--bad); font-weight: 700; } tr.tot td { font-weight: 800; background: var(--field); }
-.pick .opt { text-align: left; } .pronly{display:none} .rc.click{cursor:pointer} .rc .kv span:first-child{text-align:left} .rc .kv span:last-child{text-align:right;font-weight:600} table.sc1 td{white-space:normal;font-family:var(--f-body)} .sc1 td.lb{text-align:left;color:var(--ink)} .sc1 td.lb small{display:block;color:var(--accent);font-size:.72rem} .sc1 td.v{font-family:var(--f-num);font-weight:700;white-space:nowrap} .sc1 tr.sb td{background:var(--accent-soft)} .sc1 tr.tt td{font-weight:800;background:var(--field);border-top:2px solid var(--line);font-size:.95rem} .sc1 tr.df td{background:var(--accent-soft);text-align:left;font-size:.85rem} .sc1 tr.df.bad td{background:var(--bad-soft);color:var(--bad)} table.sc{table-layout:fixed;font-size:.78rem} .sc td{white-space:normal;padding:5px 6px;line-height:1.2;font-family:var(--f-num)} .sc td.lb{text-align:left;font-family:var(--f-body);color:var(--ink);width:68%;font-size:.85rem} .sc td.v{width:32%;font-weight:700;font-size:.95rem} .sc td.chg{color:var(--accent);background:var(--accent-soft)} .sc tr.tt td{font-weight:800;background:var(--field);border-top:2px solid var(--line)} .sc tr.df td{font-family:var(--f-body);background:var(--accent-soft);font-size:.85rem;white-space:normal;text-align:left} .sc tr.df.bad td{background:var(--bad-soft);color:var(--bad)} .row > label.f{flex:1 1 130px} .big{font-size:1.15rem} textarea.big{min-height:180px;font-size:.95rem;font-family:var(--f-num)} .dim{color:var(--muted)} .seg.sc{flex-wrap:wrap} .seg.sc button{flex:1 1 44%;padding:4px 8px;line-height:1.2}
+.pick .opt { text-align: left; } .pronly{display:none} .rc.click{cursor:pointer} .rc .kv span:first-child{text-align:left} .rc .kv span:last-child{text-align:right;font-weight:600} table.sc1 td{white-space:normal;font-family:var(--f-body)} .sc1 td.lb{text-align:left;color:var(--ink)} .sc1 td.lb small{display:block;color:var(--accent);font-size:.72rem} .sc1 td.v{font-family:var(--f-num);font-weight:700;white-space:nowrap} .sc1 tr.sb td{background:var(--accent-soft)} .sc1 tr.tt td{font-weight:800;background:var(--field);border-top:2px solid var(--line);font-size:.95rem} .sc1 tr.df td{background:var(--accent-soft);text-align:left;font-size:.85rem} .sc1 tr.df.bad td{background:var(--bad-soft);color:var(--bad)} table.sc{table-layout:fixed;font-size:.78rem} .sc td{white-space:normal;padding:5px 3px;line-height:1.2;font-family:var(--f-num)} .sc td.lb{text-align:left;font-family:var(--f-body);color:var(--muted);width:26%;font-size:.68rem} .sc td.v{width:24%;font-weight:700;font-size:.74rem;letter-spacing:-.03em;white-space:nowrap} #chk,#chk2,.rc{padding:8px} .sc td.chg{color:var(--accent);background:var(--accent-soft)} .sc tr.tt td{font-weight:800;background:var(--field);border-top:2px solid var(--line)} .sc tr.df td{font-family:var(--f-body);background:var(--accent-soft);font-size:.85rem;white-space:normal;text-align:left} .sc tr.df.bad td{background:var(--bad-soft);color:var(--bad)} .row > label.f{flex:1 1 130px} .big{font-size:1.15rem} textarea.big{min-height:180px;font-size:.95rem;font-family:var(--f-num)} .dim{color:var(--muted)} .seg.sc{flex-wrap:wrap} .seg.sc button{flex:1 1 44%;padding:4px 8px;line-height:1.2}
 #sheet { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
 #sheet .box { background: var(--bg); width: 100%; max-width: 720px; max-height: 92vh; overflow-y: auto; border-radius: 16px 16px 0 0; padding: 14px max(14px, env(safe-area-inset-left,0px)) calc(18px + env(safe-area-inset-bottom,0px)); display: flex; flex-direction: column; gap: 12px; }
 .msg { margin: 0; min-height: 1.2em; font-size: .9rem; font-weight: 600; } .msg.err { color: var(--bad); }
@@ -288,10 +288,22 @@ function scStack(x, A) {
     '<div class="chk ' + (bad ? 'bad' : '') + '"><span class="big">Different 差额: ' + fm(df) + '</span><span>' + (A ? 'Tied 平衡' : esc(ST[x.st][0])) + '</span></div>' +
     '<div class="kv" style="font-weight:800;border-top:2px solid var(--line);padding-top:4px"><span>Total (' + (A ? 'D' : 'B') + ') 总计</span><span>' + fm(td) + '</span></div>';
 }
+function scSide(x, A) {
+  var L = [['Cash Sales 现金销售', A ? x.cashA : x.cash, A && x.cashA !== x.cash], ['Misc Charges 杂项费用', A ? x.miscA : x.misc, A && x.miscA !== x.misc], ['Other Charges 其他费用', x.other], ['Amount 金额<br>(Cash - Misc - Other)', A ? x.amountA : x.amount], ['Credit Collection 赊账收款', x.E], ['Amount 2 金额2<br>(Amount + Credit Coll)', A ? x.amount2A : x.amount2], ['', null], ['b/f petty cash 上日备用金', x.bf]];
+  var R = [['c/f petty cash 今日备用金', A ? x.cfA : x.cf, A && x.cfA !== x.cf], ['cash collection 现金收款', x.hc], ['Cheque Collection 支票收款', x.cr], ['TNG collection TNG收款', x.tng], ['Advance Salary_M 预支M', x.am], ['Advance Salary_H 预支H', x.ah], ['', null], ['', null]];
+  var dd = x.date.split('-'), h = '<div class="mh">' + (A ? 'After 调整后 (After)' : 'Before 调整前') + ' &nbsp; ' + dd[2] + '.' + dd[1] + '.' + dd[0] + '</div><div class="tw"><table class="sc"><tbody>';
+  for (var k = 0; k < 8; k++) {
+    var a = L[k], b = R[k];
+    h += '<tr><td class="lb">' + a[0] + '</td><td class="v' + (a[2] ? ' chg' : '') + '">' + (a[1] == null ? '' : fm(a[1])) + '</td><td class="lb">' + b[0] + '</td><td class="v' + (b[2] ? ' chg' : '') + '">' + (b[1] == null ? '' : fm(b[1])) + '</td></tr>';
+  }
+  h += '<tr class="tt"><td class="lb">' + (A ? 'Total (C) 总计C' : 'Total (A) 总计A') + '</td><td class="v">' + fm(A ? x.totalCA : x.totalC) + '</td><td class="lb">' + (A ? 'Total (D) 总计D' : 'Total (B) 总计B') + '</td><td class="v">' + fm(A ? x.totalDA : x.totalD) + '</td></tr>';
+  var dif = A ? x.diffA : x.diff, bad = !A && ST[x.st][1] === 'bad';
+  return h + '<tr class="df' + (bad ? ' bad' : '') + '"><td colspan="4" class="t"><b>Different 差额: ' + fm(dif) + '</b> &nbsp; ' + (A ? 'Tied 平衡' : esc(ST[x.st][0])) + '</td></tr></tbody></table></div>';
+}
 function liveHTML(d) {
   var x = C.byDate[d.date]; if (!x) return { chk: '', chk2: '', sum: '', hint: '' };
-  var chk = '<div class="mh">Sales &amp; Collection 销售与收款</div>' + scStack(x, true);
-  var chk2 = scStack(x, false);
+  var chk = '<div class="mh">Sales &amp; Collection 销售与收款</div>' + scSide(x, true);
+  var chk2 = scSide(x, false);
   var sum = '<div class="mh">Position 结余</div>' + kv('Daily sale 每日销售', fm(x.dailySale)) + kv('AR &amp; AP balance c/f', fm(x.arK)) + kv('Bank 银行', fm(x.bank)) + kv('Cheque in hand 手头支票', f0(x.chqU) + ' / ' + fm(x.chqRM)) +
     kv('Cash in hand 手头现金', fm(x.cashHand)) + kv('Loose cash 零散现金', fm(x.loose)) + kv('Advance salary 预支', fm(x.adv)) + kv('Total 总计', fm(x.total)) +
     '<div class="chk ' + (x.check !== 0 ? 'bad' : '') + '">Cash flow check 核对 (should be 0 应为0): <span class="big">' + fm(x.check) + '</span></div>';
@@ -312,11 +324,11 @@ function vDay() {
       '<div class="card"><div class="mh">Collected today 今日收款 (include buyers 包括买家)</div><div class="row">' + fld('Cash collection 现金收款', 'data-f="hc"', d.hc) + fld('TNG 收款', 'data-f="tng"', d.tng) + '</div>' +
       '<div class="row">' + fld('Cheque (unit) 支票张数', 'data-f="cu"', d.cu) + fld('Cheque RM 支票金额', 'data-f="cr"', d.cr) + '</div><p class="hint" id="hint">' + esc(L.hint) + '</p></div>' +
       '<div class="card"><div class="mh">Advance salary 预支薪水</div><div class="row">' + fld('M', 'data-f="am"', d.am) + fld('H', 'data-f="ah"', d.ah) + '</div></div>' +
-      '<div class="card" id="chk">' + L.chk + '</div><div class="card" id="chk2">' + L.chk2 + '</div><div class="card" id="dsum">' + L.sum + '</div>';
+      '<div class="card" id="chk">' + L.chk + '</div><div class="card" id="chk2">' + L.chk2 + '</div>';
   }
   var de = S().deb.filter(function (e) { return e.date === ui.date; }), bk = S().bank.filter(function (b) { return b.date === ui.date; });
   h += '<div class="card"><div class="mh">Buyer entries 买家记录</div><div class="list">' + (de.length ? de.map(entRow).join('') : '<p class="hint">None yet 暂无</p>') + '</div>' +
-    '<div class="row"><button class="btn small" data-act="newdeb:credit">＋ Credit sale 赊销</button><button class="btn small" data-act="newdeb:coll">＋ Collection 收款</button></div></div>' +
+    '<button class="btn main" data-act="newdeb:both">＋ Buyer entry 买家记录 (credit sale + collection)</button></div>' +
     '<div class="card"><div class="mh">Bank 银行记录</div><div class="list">' + (bk.length ? bk.map(bankRow).join('') : '<p class="hint">None yet 暂无</p>') + '</div>' +
     '<button class="btn small" data-act="newbank">＋ Bank entry 银行记录</button></div>';
   if (d) h += '<div class="row nopr"><button class="btn quiet" data-act="wa">Day summary 当日摘要 (WhatsApp)</button><button class="btn quiet' + (ui.confirm === 'delday' ? ' sure' : '') + '" data-act="delday">' + (ui.confirm === 'delday' ? 'Tap again to delete 再按一次确认删除' : 'Delete this day 删除这天') + '</button></div>';
@@ -358,7 +370,7 @@ function stmtSheet(id) {
   }));
   var h = '<div class="mh">' + esc(bn(b)) + '</div><div class="chk ' + (s.bal > 0 ? 'bad' : '') + '"><span>Balance owing 欠款余额</span><span class="big">' + fm(s.bal) + '</span></div>' +
     tbl(['Date 日期', 'Sale 赊销', 'Paid 付款', 'Disc 折扣', 'Balance 余额'], rows, { tab: 1, t: [0], go: 1, attr: function (ri) { var it = ri > 0 ? its[ri - 1] : null; return it && it.src === 'e' ? 'data-ent="' + it.id + '"' : (it ? 'data-bnk="' + it.id + '"' : ''); } }) +
-    '<div class="row"><button class="btn small" data-act="newdeb:credit:' + id + '">＋ Credit sale 赊销</button><button class="btn small" data-act="newdeb:coll:' + id + '">＋ Collection 收款</button></div>' +
+    '<button class="btn small" data-act="newdeb:both:' + id + '">＋ New entry 新记录 (credit sale / collection)</button>' +
     '<div class="row"><button class="btn small quiet" data-act="editbuyer:' + id + '">Edit buyer 修改买家</button><button class="btn small quiet" data-act="close">Close 关闭</button></div>';
   openSheet(h);
 }
@@ -389,6 +401,19 @@ function plist(q) {
 }
 function debSheet() {
   var e = cur, isC = e.type === 'coll';
+  if (!e.id) {
+    openSheet('<div class="mh">Buyer entry 买家记录</div><p class="hint">Key credit sale and/or collection together - one Save 可同时输入赊销和收款,一次保存</p>' +
+      '<label class="f">Date 日期<input type="date" data-e="date" value="' + e.date + '"></label>' +
+      '<div class="f" style="display:flex;flex-direction:column;gap:4px;font-size:.8rem;font-weight:600;color:var(--muted)">Buyer 买家<div id="pk">' + pickerHTML() + '</div></div>' +
+      '<div class="card">' + fld('Credit sale 赊销 (buyer takes goods 买家赊账)', 'data-e="csale"', e.csale) + '</div>' +
+      '<div class="card">' + fld('Collection 收款 (buyer pays 买家付款)', 'data-e="amt"', e.amt) +
+      '<div class="seg"><button data-es="mode:cash" class="' + (e.mode === 'cash' ? 'on' : '') + '">Cash 现金</button><button data-es="mode:chq" class="' + (e.mode === 'chq' ? 'on' : '') + '">Cheque 支票</button></div>' +
+      fld('Discount 折扣 (optional 可不填)', 'data-e="disc"', e.disc) +
+      (e.mode === 'chq' ? '<label class="f">Bank-in date 存入日期 (leave empty until banked 未存入请留空)<input type="date" data-e="bankin" value="' + (e.bankin || '') + '"></label>' : '') + '</div>' +
+      '<label class="f">Remarks 备注<input data-e="rem" value="' + esc(e.rem) + '" autocomplete="off"></label><p class="msg err" id="emsg"></p>' +
+      '<button class="btn main" data-act="savedeb">Save 保存</button><button class="btn" data-act="savedeb:next">Save &amp; next buyer 保存并输入下一位</button><button class="btn quiet" data-act="close">Cancel 取消</button>');
+    return;
+  }
   openSheet('<div class="mh">' + (e.id ? 'Edit entry 修改记录' : 'New entry 新增记录') + '</div>' +
     '<div class="seg"><button data-es="type:credit" class="' + (!isC ? 'on' : '') + '">Credit sale 赊销</button><button data-es="type:coll" class="' + (isC ? 'on' : '') + '">Collection 收款</button></div>' +
     (isC ? '<div class="seg"><button data-es="mode:cash" class="' + (e.mode === 'cash' ? 'on' : '') + '">Cash 现金</button><button data-es="mode:chq" class="' + (e.mode === 'chq' ? 'on' : '') + '">Cheque 支票</button></div>' : '') +
@@ -426,8 +451,9 @@ function vReports() {
       R.push([fd(x.date), fm(A ? x.cashA : x.cash), fm(A ? x.miscA : x.misc), fm(x.other), fm(A ? x.amountA : x.amount), fm(x.E), fm(A ? x.amount2A : x.amount2), fm(x.bf), fm(A ? x.totalCA : x.totalC),
         fm(A ? x.cfA : x.cf), fm(x.hc), fm(x.cr), fm(x.tng), fm(x.am), fm(x.ah), fm(A ? x.totalDA : x.totalD), fm(x.diff), ST[x.st][0].split(' - ')[0]]);
     });
-    h += tbl(['Date 日期', 'Cash Sales 现金销售', 'Misc Charges 杂项', 'Other Charges 其他', 'Amount 金额', 'Credit Collection 赊账收款', 'Amount 2 金额2', 'b/f petty cash 上日备用金', A ? 'Total (C)' : 'Total (A)', 'c/f petty cash 今日备用金', 'Cash collection 现金收款', 'Cheque Collection 支票收款', 'TNG', 'Advance M', 'Advance H', A ? 'Total (D)' : 'Total (B)', 'Different 差额(调整前)', 'Status'], R, { go: 1, t: [17], attr: function (i) { return 'data-go="' + days[i].date + '"'; }, bad: function (i) { return days[i].st === 'alert'; } });
-    h += '<p class="hint nopr">Tap a row to open that day 点一行打开当天.</p>';
+    lastTbl = { heads: ['Date 日期', 'Cash Sales 现金销售', 'Misc Charges 杂项', 'Other Charges 其他', 'Amount 金额', 'Credit Collection 赊账收款', 'Amount 2 金额2', 'b/f petty cash 上日备用金', A ? 'Total (C)' : 'Total (A)', 'c/f petty cash 今日备用金', 'Cash collection 现金收款', 'Cheque Collection 支票收款', 'TNG', 'Advance M', 'Advance H', A ? 'Total (D)' : 'Total (B)', 'Different 差额(调整前)', 'Status'], rows: R };
+    days.forEach(function (x) { h += '<div class="card rc click" data-go="' + x.date + '" style="gap:4px">' + scSide(x, A) + '</div>'; });
+    h += '<p class="hint nopr">Tap a day to open it 点一天打开当天.</p>';
   } else if (ui.rep === 'flow') {
     days.forEach(function (x) { R.push([fd(x.date), fm(x.bank), f0(x.chqU), fm(x.chqRM), fm(x.petty), fm(x.adv), fm(x.loose), fm(x.cashHand), fm(x.total), fm(x.arK), fm(x.check)]); });
     h += tbl(['Date 日期', 'Bank 银行', 'Chq unit', 'Chq RM', 'Petty', 'Advance', 'Loose cash', 'Cash in hand', 'Total', 'AR&AP', 'Check'], R, { go: 1, attr: function (i) { return 'data-go="' + days[i].date + '"'; }, bad: function (i) { return days[i].check !== 0; } });
@@ -492,7 +518,7 @@ function vSetup() {
   if (ui.pending) h += '<div class="chk bad"><b>File has ' + ui.pending.days.length + ' days, ' + ui.pending.buyers.length + ' buyers, ' + ui.pending.deb.length + ' entries.</b><span>This will REPLACE everything on this phone 会取代这部手机所有数据</span></div><button class="btn sure" data-act="restore">Replace all with this file 确认还原</button><button class="btn quiet" data-act="cancelrestore">Cancel 取消</button>';
   h += '</div>';
   var empty = !st.days.length && !st.buyers.length && !st.deb.length && !st.bank.length;
-  h += '<div class="card"><div class="mh">More 其他</div><p class="hint">Version 版本: v7 vertical reports 竖向报表</p>' + (empty ? '<button class="btn quiet" data-act="demo">Load demo data 载入示范数据</button>' : '') +
+  h += '<div class="card"><div class="mh">More 其他</div><p class="hint">Version 版本: v9 side-by-side + combined entry</p>' + (empty ? '<button class="btn quiet" data-act="demo">Load demo data 载入示范数据</button>' : '') +
     '<button class="btn quiet' + (ui.confirm === 'reset' ? ' sure' : '') + '" data-act="reset">' + (ui.confirm === 'reset' ? 'Tap again: ERASE EVERYTHING 再按一次:清除所有数据' : 'Erase all data 清除所有数据') + '</button></div>';
   return h;
 }
@@ -517,7 +543,7 @@ function render() {
 function go(v) { ui.v = v; ui.confirm = ''; render(); window.scrollTo(0, 0); }
 
 /* ---------- actions ---------- */
-function newDeb(type, buyer) { cur = { id: '', date: ui.date, buyer: buyer || '', type: type, mode: 'cash', amt: '', disc: '', rem: '', bankin: '' }; curKind = 'deb'; debSheet(); }
+function newDeb(type, buyer, keep) { cur = { id: '', date: keep || ui.date, buyer: buyer || '', type: 'both', csale: '', mode: 'cash', amt: '', disc: '', rem: '', bankin: '' }; curKind = 'deb'; debSheet(); }
 function dayDefaults(date) {
   var prev = null; S().days.forEach(function (d) { if (d.date < date && (!prev || d.date > prev.date)) prev = d; });
   var bf = prev ? num(prev.cf) : S().ob.petty;
@@ -537,7 +563,7 @@ function act(a, el) {
   else if (k === 'today') { ui.date = U.todayStr(); render(); }
   else if (k === 'startday') { S().days.push(dayDefaults(ui.date)); save(); render(); }
   else if (k === 'delday') { if (ui.confirm === 'delday') { S().days = S().days.filter(function (d) { return d.date !== ui.date; }); ui.confirm = ''; save(); render(); } else tempConfirm('delday'); }
-  else if (k === 'newdeb') newDeb(p[1], p[2] || '');
+  else if (k === 'newdeb') newDeb('', p[2] || '');
   else if (k === 'newbank') { cur = { id: '', date: ui.date, type: 'online', buyer: '', units: '', amt: '', desc: '' }; curKind = 'bank'; bankSheet(); }
   else if (k === 'newbuyer') buyerSheet('');
   else if (k === 'editbuyer') buyerSheet(p[1]);
@@ -553,10 +579,22 @@ function act(a, el) {
   }
   else if (k === 'delbuyer') { S().buyers = S().buyers.filter(function (b) { return b.id !== cur.id; }); save(); closeSheet(); render(); }
   else if (k === 'savedeb') {
-    var e = cur, amt = num(e.amt);
-    if (!e.buyer) return err('Choose a buyer 请选择买家'); if (!(amt > 0)) return err('Enter the amount 请输入金额'); if (!e.date) return err('Choose a date 请选择日期');
-    var o = { id: e.id || U.uid(), date: e.date, buyer: e.buyer, type: e.type, mode: e.type === 'coll' ? e.mode : '', amt: r2(amt), disc: e.type === 'coll' ? r2(num(e.disc)) : 0, rem: (e.rem || '').trim(), bankin: (e.type === 'coll' && e.mode === 'chq') ? (e.bankin || '') : '' };
-    if (e.id) S().deb = S().deb.map(function (x) { return x.id === e.id ? o : x; }); else S().deb.push(o);
+    var e = cur;
+    if (!e.buyer) return err('Choose a buyer 请选择买家'); if (!e.date) return err('Choose a date 请选择日期');
+    if (!e.id) {
+      var cs = num(e.csale), co = num(e.amt);
+      if (!(cs > 0) && !(co > 0)) return err('Enter a credit sale and/or a collection amount 请输入赊销或收款金额');
+      var rem = (e.rem || '').trim();
+      if (co > 0) S().deb.push({ id: U.uid(), date: e.date, buyer: e.buyer, type: 'coll', mode: e.mode, amt: r2(co), disc: r2(num(e.disc)), rem: rem, bankin: e.mode === 'chq' ? (e.bankin || '') : '' });
+      if (cs > 0) S().deb.push({ id: U.uid(), date: e.date, buyer: e.buyer, type: 'credit', mode: '', amt: r2(cs), disc: 0, rem: rem, bankin: '' });
+      ui.date = e.date; save(); var dt = e.date; closeSheet(); render();
+      if (p[1] === 'next') newDeb('', '', dt);
+      return;
+    }
+    var amt = num(e.amt);
+    if (!(amt > 0)) return err('Enter the amount 请输入金额');
+    var o = { id: e.id, date: e.date, buyer: e.buyer, type: e.type, mode: e.type === 'coll' ? e.mode : '', amt: r2(amt), disc: e.type === 'coll' ? r2(num(e.disc)) : 0, rem: (e.rem || '').trim(), bankin: (e.type === 'coll' && e.mode === 'chq') ? (e.bankin || '') : '' };
+    S().deb = S().deb.map(function (x) { return x.id === e.id ? o : x; });
     ui.date = o.date; save(); closeSheet(); render();
   }
   else if (k === 'deldeb') { S().deb = S().deb.filter(function (x) { return x.id !== cur.id; }); save(); closeSheet(); render(); }
