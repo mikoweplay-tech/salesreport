@@ -35,7 +35,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
 table { border-collapse: collapse; width: 100%; font-size: .82rem; } th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-family: var(--f-num); } th { background: var(--accent-soft); font-family: var(--f-body); font-size: .75rem; position: sticky; top: 0; }
 td:first-child, th:first-child { text-align: left; } td.t, th.t { text-align: left; font-family: var(--f-body); } tr.click { cursor: pointer; } tr.bad td { background: var(--bad-soft); color: var(--bad); font-weight: 700; } tr.tot td { font-weight: 800; background: var(--field); }
-.pick .opt { text-align: left; } .pronly{display:none} .row > label.f{flex:1 1 130px} .big{font-size:1.15rem} textarea.big{min-height:180px;font-size:.95rem;font-family:var(--f-num)} .dim{color:var(--muted)} .seg.sc{overflow-x:auto} .seg.sc button{flex:0 0 auto;padding:0 12px;white-space:nowrap}
+.pick .opt { text-align: left; } .pronly{display:none} table.sc{table-layout:fixed;font-size:.78rem} .sc td{white-space:normal;padding:5px 6px;line-height:1.2;font-family:var(--f-num)} .sc td.lb{text-align:left;font-family:var(--f-body);color:var(--muted);width:29%;font-size:.72rem} .sc td.v{width:21%;font-weight:700} .sc td.chg{color:var(--accent);background:var(--accent-soft)} .sc tr.tt td{font-weight:800;background:var(--field);border-top:2px solid var(--line)} .sc tr.df td{font-family:var(--f-body);background:var(--accent-soft);font-size:.85rem;white-space:normal;text-align:left} .sc tr.df.bad td{background:var(--bad-soft);color:var(--bad)} .row > label.f{flex:1 1 130px} .big{font-size:1.15rem} textarea.big{min-height:180px;font-size:.95rem;font-family:var(--f-num)} .dim{color:var(--muted)} .seg.sc{overflow-x:auto} .seg.sc button{flex:0 0 auto;padding:0 12px;white-space:nowrap}
 #sheet { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
 #sheet .box { background: var(--bg); width: 100%; max-width: 720px; max-height: 92vh; overflow-y: auto; border-radius: 16px 16px 0 0; padding: 14px max(14px, env(safe-area-inset-left,0px)) calc(18px + env(safe-area-inset-bottom,0px)); display: flex; flex-direction: column; gap: 12px; }
 .msg { margin: 0; min-height: 1.2em; font-size: .9rem; font-weight: 600; } .msg.err { color: var(--bad); }
@@ -202,7 +202,7 @@ SR.demo = function () {
 (function () {
 'use strict';
 var SR = window.SR, U = SR.u, $ = U.$, $$ = U.$$, esc = U.esc, num = U.num, fm = U.fm, f0 = U.f0, fd = U.fd, r2 = U.r2;
-var ui = { v: 'day', date: U.todayStr(), rep: 'daily', rdate: '', q: '', confirm: '', pending: null };
+var ui = { v: 'day', date: U.todayStr(), rep: 'sc', rdate: '', q: '', confirm: '', pending: null };
 var cur = null, curKind = '', lastTbl = null, C = null;
 var DAYF = ['cash', 'misc', 'other', 'bf', 'cf', 'hc', 'cu', 'cr', 'tng', 'am', 'ah'];
 var TYPES = { online: 'Online collection 网上收款', chqdep: 'Cheque deposit 支票存入', cashdep: 'Cash deposit 现金存入', other: 'Other deposit 其他存入', wd: 'Withdrawal 提取' };
@@ -248,14 +248,23 @@ function renderWarn() {
 function dateNav() {
   return '<div class="row nopr"><button class="btn small quiet fix" data-act="prev">‹</button><input type="date" id="dsel" value="' + ui.date + '"><button class="btn small quiet fix" data-act="next">›</button><button class="btn small quiet fix" data-act="today">Today 今天</button></div>';
 }
+function scBlock(x, after) {
+  var A = after, L = [['Cash Sales 现金销售', A ? x.cashA : x.cash, A && x.cashA !== x.cash], ['Misc Charges 杂项费用', A ? x.miscA : x.misc, A && x.miscA !== x.misc], ['Other Charges 其他费用', x.other], ['Amount 金额<br>(Cash - Misc - Other)', A ? x.amountA : x.amount], ['Credit Collection 赊账收款', x.E], ['Amount 2 金额2<br>(Amount + Credit Coll)', A ? x.amount2A : x.amount2], ['', null], ['b/f petty cash 上日备用金', x.bf]];
+  var R = [['c/f petty cash 今日备用金', A ? x.cfA : x.cf, A && x.cfA !== x.cf], ['cash collection 现金收款', x.hc], ['Cheque Collection 支票收款', x.cr], ['TNG collection TNG收款', x.tng], ['Advance Salary_M 预支M', x.am], ['Advance Salary_H 预支H', x.ah], ['', null], ['', null]];
+  var h = '<div class="tw"><table class="sc"><tbody>';
+  for (var k = 0; k < 8; k++) {
+    var a = L[k], b = R[k];
+    h += '<tr><td class="lb">' + a[0] + '</td><td class="v' + (a[2] ? ' chg' : '') + '">' + (a[1] == null ? '' : fm(a[1])) + '</td><td class="lb">' + b[0] + '</td><td class="v' + (b[2] ? ' chg' : '') + '">' + (b[1] == null ? '' : fm(b[1])) + '</td></tr>';
+  }
+  h += '<tr class="tt"><td class="lb">' + (A ? 'Total (C) 总计C' : 'Total (A) 总计A') + '</td><td class="v">' + fm(A ? x.totalCA : x.totalC) + '</td><td class="lb">' + (A ? 'Total (D) 总计D' : 'Total (B) 总计B') + '</td><td class="v">' + fm(A ? x.totalDA : x.totalD) + '</td></tr>';
+  var dif = A ? x.diffA : x.diff, bad = !A && ST[x.st][1] === 'bad';
+  h += '<tr class="df' + (bad ? ' bad' : '') + '"><td colspan="4" class="t"><b>Different 差额: ' + fm(dif) + '</b> &nbsp; ' + (A ? 'Tied 平衡' : esc(ST[x.st][0])) + '</td></tr></tbody></table></div>';
+  return h;
+}
 function liveHTML(d) {
   var x = C.byDate[d.date]; if (!x) return { chk: '', sum: '', hint: '' };
-  var s = ST[x.st], bad = s[1] === 'bad';
-  var chk = '<div class="mh">Balance check 核对</div>' +
-    kv('Total (C) 总计C = sales + b/f petty 销售+上日备用金', fm(x.totalC)) + kv('Total (D) 总计D = what you hold 手上合计', fm(x.totalD)) +
-    '<div class="chk ' + (bad ? 'bad' : '') + '"><span class="big">Different 差额: ' + fm(x.diff) + '</span><span>' + s[0] + '</span></div>';
-  var sum = '<div class="mh">After balancing 调整后</div>' + kv('Daily sale 每日销售', fm(x.dailySale)) + kv('Cash sales 现金销售', fm(x.cashA)) + kv('Misc charges 杂项费用', fm(x.miscA)) + kv('c/f petty cash 备用金', fm(x.cfA)) +
-    '<div class="mh" style="margin-top:6px">Position 结余</div>' + kv('AR &amp; AP balance c/f', fm(x.arK)) + kv('Bank 银行', fm(x.bank)) + kv('Cheque in hand 手头支票', f0(x.chqU) + ' / ' + fm(x.chqRM)) +
+  var chk = '<div class="mh">Sales &amp; Collection 销售与收款 - ' + fd(x.date) + '</div>' + scBlock(x, false) + '<div class="mh">After 调整后</div>' + scBlock(x, true);
+  var sum = '<div class="mh">Position 结余</div>' + kv('Daily sale 每日销售', fm(x.dailySale)) + kv('AR &amp; AP balance c/f', fm(x.arK)) + kv('Bank 银行', fm(x.bank)) + kv('Cheque in hand 手头支票', f0(x.chqU) + ' / ' + fm(x.chqRM)) +
     kv('Cash in hand 手头现金', fm(x.cashHand)) + kv('Loose cash 零散现金', fm(x.loose)) + kv('Advance salary 预支', fm(x.adv)) + kv('Total 总计', fm(x.total)) +
     '<div class="chk ' + (x.check !== 0 ? 'bad' : '') + '">Cash flow check 核对 (should be 0 应为0): <span class="big">' + fm(x.check) + '</span></div>';
   var ce = S().deb.filter(function (e) { return e.date === d.date && e.type === 'coll'; });
@@ -376,15 +385,19 @@ function bankSheet() {
 function err(m) { var e = $('#emsg'); if (e) e.textContent = m; }
 
 /* ---------- Reports ---------- */
-var REPS = [['daily', 'Daily 每日'], ['flow', 'Cash flow 现金流'], ['ar', 'AR &amp; AP'], ['debt', 'Debtors 债务人'], ['dd', 'Debtor daily 每日债务'], ['bank', 'Bank 银行'], ['chq', 'Cheques 支票']];
-var REPNAME = { daily: 'Sales & Collection 每日销售与收款', flow: 'Cash flow 现金流', ar: 'AR & AP', debt: 'Debtor summary 债务人总表', dd: 'Debtor daily 债务人每日明细', bank: 'Bank statement 银行记录', chq: 'Cheque on hand 手头支票' };
+var REPS = [['sc', 'Sales & Collection 销售收款'], ['daily', 'Daily table 每日表'], ['flow', 'Cash flow 现金流'], ['ar', 'AR &amp; AP'], ['debt', 'Debtors 债务人'], ['dd', 'Debtor daily 每日债务'], ['bank', 'Bank 银行'], ['chq', 'Cheques 支票']];
+var REPNAME = { sc: 'Sales & Collection 每日销售与收款', daily: 'Sales & Collection 每日销售与收款', flow: 'Cash flow 现金流', ar: 'AR & AP', debt: 'Debtor summary 债务人总表', dd: 'Debtor daily 债务人每日明细', bank: 'Bank statement 银行记录', chq: 'Cheque on hand 手头支票' };
 function vReports() {
   var h = '<div class="seg sc nopr">' + REPS.map(function (r) { return '<button data-rep="' + r[0] + '" class="' + (ui.rep === r[0] ? 'on' : '') + '">' + r[1] + '</button>'; }).join('') + '</div>' +
     '<div class="pronly"><h2>' + REPNAME[ui.rep] + '</h2></div>';
   var days = C.days, R = [];
-  if (ui.rep === 'daily') {
+  if (ui.rep === 'sc') {
+    if (!days.length) h += '<p class="hint">No days yet 还没有记录</p>';
+    days.slice().reverse().forEach(function (x) { h += '<div class="card" data-go="' + x.date + '" style="break-inside:avoid"><div class="mh">Date 日期: ' + fd(x.date) + '</div>' + scBlock(x, false) + '<div class="mh">After 调整后</div>' + scBlock(x, true) + '</div>'; });
+    h += '<p class="hint nopr">Newest first. Tap a day to open it 最新在上,点一天打开.</p>';
+  } else if (ui.rep === 'daily') {
     days.forEach(function (x) { R.push([fd(x.date), fm(x.cash), fm(x.misc), fm(x.other), fm(x.E), fm(x.dailySale), fm(x.bf), fm(x.totalC), fm(x.cf), fm(x.hc), fm(x.cr), fm(x.tng), fm(x.am + x.ah), fm(x.totalD), fm(x.diff), ST[x.st][0].split(' - ')[0]]); });
-    h += tbl(['Date 日期', 'Cash sales', 'Misc', 'Other', 'Credit coll', 'Daily sale', 'b/f petty', 'Total C', 'c/f petty', 'Cash coll', 'Cheque', 'TNG', 'Advance', 'Total D', 'Different', 'Status'], R, { go: 1, t: [15], attr: function (i) { return 'data-go="' + days[i].date + '"'; }, bad: function (i) { return days[i].st === 'alert'; } });
+    h += tbl(['Date 日期', 'Cash sales', 'Misc', 'Other', 'Credit coll', 'Daily sale', 'b/f petty', 'Total A', 'c/f petty', 'Cash coll', 'Cheque', 'TNG', 'Advance', 'Total B', 'Different', 'Status'], R, { go: 1, t: [15], attr: function (i) { return 'data-go="' + days[i].date + '"'; }, bad: function (i) { return days[i].st === 'alert'; } });
     h += '<p class="hint nopr">Tap a row to open that day 点一行打开当天. Daily sale = after balancing 调整后.</p>';
   } else if (ui.rep === 'flow') {
     days.forEach(function (x) { R.push([fd(x.date), fm(x.bank), f0(x.chqU), fm(x.chqRM), fm(x.petty), fm(x.adv), fm(x.loose), fm(x.cashHand), fm(x.total), fm(x.arK), fm(x.check)]); });
@@ -427,7 +440,7 @@ function vReports() {
     if (list.length) R.push(['', '', list.length + ' cheques 张', fm(U.sum(list, function (e) { return e.amt; })), '']);
     h += list.length ? tbl(['No', 'Received 收到', 'Buyer 买家', 'Amount 金额', 'Remarks'], R, { t: [2, 4], go: 1, tot: 1, attr: function (i) { return list[i] ? 'data-ent="' + list[i].id + '"' : ''; } }) + '<p class="hint nopr">Tap a cheque and fill the Bank-in date when you bank it in 存入银行后点支票填写存入日期.</p>' : '<p class="hint">No cheques on hand 没有手头支票</p>';
   }
-  if (days.length || ui.rep === 'debt' || ui.rep === 'chq') h += '<div class="row nopr"><button class="btn quiet" data-act="print">Print / PDF 打印</button><button class="btn quiet" data-act="csv">Download CSV 下载</button></div><div class="nopr"><button class="btn main" data-act="xlsx">Export to Excel 导出Excel</button><p class="msg" id="xmsg"></p></div>';
+  if (ui.rep !== 'sc' && (days.length || ui.rep === 'debt' || ui.rep === 'chq')) h += '<div class="row nopr"><button class="btn quiet" data-act="print">Print / PDF 打印</button><button class="btn quiet" data-act="csv">Download CSV 下载</button></div><div class="nopr"><button class="btn main" data-act="xlsx">Export to Excel 导出Excel</button><p class="msg" id="xmsg"></p></div>';
   return h;
 }
 
