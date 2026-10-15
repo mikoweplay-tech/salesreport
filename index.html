@@ -35,7 +35,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
 table { border-collapse: collapse; width: 100%; font-size: .82rem; } th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-family: var(--f-num); } th { background: var(--accent-soft); font-family: var(--f-body); font-size: .75rem; position: sticky; top: 0; }
 td:first-child, th:first-child { text-align: left; } td.t, th.t { text-align: left; font-family: var(--f-body); } tr.click { cursor: pointer; } tr.bad td { background: var(--bad-soft); color: var(--bad); font-weight: 700; } tr.tot td { font-weight: 800; background: var(--field); }
-.pick .opt { text-align: left; } .pronly{display:none} table.sc{table-layout:fixed;font-size:.78rem} .sc td{white-space:normal;padding:5px 6px;line-height:1.2;font-family:var(--f-num)} .sc td.lb{text-align:left;font-family:var(--f-body);color:var(--muted);width:29%;font-size:.72rem} .sc td.v{width:21%;font-weight:700} .sc td.chg{color:var(--accent);background:var(--accent-soft)} .sc tr.tt td{font-weight:800;background:var(--field);border-top:2px solid var(--line)} .sc tr.df td{font-family:var(--f-body);background:var(--accent-soft);font-size:.85rem;white-space:normal;text-align:left} .sc tr.df.bad td{background:var(--bad-soft);color:var(--bad)} .row > label.f{flex:1 1 130px} .big{font-size:1.15rem} textarea.big{min-height:180px;font-size:.95rem;font-family:var(--f-num)} .dim{color:var(--muted)} .seg.sc{overflow-x:auto} .seg.sc button{flex:0 0 auto;padding:0 12px;white-space:nowrap}
+.pick .opt { text-align: left; } .pronly{display:none} .rc.click{cursor:pointer} .rc .kv span:first-child{text-align:left} .rc .kv span:last-child{text-align:right;font-weight:600} table.sc1 td{white-space:normal;font-family:var(--f-body)} .sc1 td.lb{text-align:left;color:var(--ink)} .sc1 td.lb small{display:block;color:var(--accent);font-size:.72rem} .sc1 td.v{font-family:var(--f-num);font-weight:700;white-space:nowrap} .sc1 tr.sb td{background:var(--accent-soft)} .sc1 tr.tt td{font-weight:800;background:var(--field);border-top:2px solid var(--line);font-size:.95rem} .sc1 tr.df td{background:var(--accent-soft);text-align:left;font-size:.85rem} .sc1 tr.df.bad td{background:var(--bad-soft);color:var(--bad)} table.sc{table-layout:fixed;font-size:.78rem} .sc td{white-space:normal;padding:5px 6px;line-height:1.2;font-family:var(--f-num)} .sc td.lb{text-align:left;font-family:var(--f-body);color:var(--ink);width:68%;font-size:.85rem} .sc td.v{width:32%;font-weight:700;font-size:.95rem} .sc td.chg{color:var(--accent);background:var(--accent-soft)} .sc tr.tt td{font-weight:800;background:var(--field);border-top:2px solid var(--line)} .sc tr.df td{font-family:var(--f-body);background:var(--accent-soft);font-size:.85rem;white-space:normal;text-align:left} .sc tr.df.bad td{background:var(--bad-soft);color:var(--bad)} .row > label.f{flex:1 1 130px} .big{font-size:1.15rem} textarea.big{min-height:180px;font-size:.95rem;font-family:var(--f-num)} .dim{color:var(--muted)} .seg.sc{overflow-x:auto} .seg.sc button{flex:0 0 auto;padding:0 12px;white-space:nowrap}
 #sheet { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
 #sheet .box { background: var(--bg); width: 100%; max-width: 720px; max-height: 92vh; overflow-y: auto; border-radius: 16px 16px 0 0; padding: 14px max(14px, env(safe-area-inset-left,0px)) calc(18px + env(safe-area-inset-bottom,0px)); display: flex; flex-direction: column; gap: 12px; }
 .msg { margin: 0; min-height: 1.2em; font-size: .9rem; font-weight: 600; } .msg.err { color: var(--bad); }
@@ -202,7 +202,7 @@ SR.demo = function () {
 (function () {
 'use strict';
 var SR = window.SR, U = SR.u, $ = U.$, $$ = U.$$, esc = U.esc, num = U.num, fm = U.fm, f0 = U.f0, fd = U.fd, r2 = U.r2;
-var ui = { v: 'day', date: U.todayStr(), rep: 'sc', rdate: '', q: '', confirm: '', pending: null };
+var ui = { v: 'day', date: U.todayStr(), rep: 'daily', rdate: '', q: '', confirm: '', pending: null };
 var cur = null, curKind = '', lastTbl = null, C = null;
 var DAYF = ['cash', 'misc', 'other', 'bf', 'cf', 'hc', 'cu', 'cr', 'tng', 'am', 'ah'];
 var TYPES = { online: 'Online collection 网上收款', chqdep: 'Cheque deposit 支票存入', cashdep: 'Cash deposit 现金存入', other: 'Other deposit 其他存入', wd: 'Withdrawal 提取' };
@@ -219,6 +219,19 @@ function fld(label, attr, val, extra) {
 }
 function kv(a, b, cls) { return '<div class="kv"><span>' + a + '</span><span class="' + (cls || '') + '">' + b + '</span></div>'; }
 function tbl(heads, rows, meta) {
+  meta = meta || {};
+  if (meta.tab) return tblT(heads, rows, meta);
+  lastTbl = { heads: heads, rows: rows };
+  var h = '<div class="list">';
+  rows.forEach(function (r, ri) {
+    var hi = (r[0] !== '' && r[0] != null) ? 0 : 1, attr = meta.attr ? meta.attr(ri) : '', isTot = meta.tot && ri === rows.length - 1, bad = meta.bad && meta.bad(ri);
+    h += '<div class="card rc' + (meta.go ? ' click' : '') + '" ' + attr + ' style="gap:4px;' + (bad ? 'border-color:var(--bad);background:var(--bad-soft);' : isTot ? 'background:var(--field);border-width:2px;' : '') + '"><div class="mh">' + (hi === 0 ? esc(heads[0]) + ': ' : '') + esc(r[hi]) + '</div>';
+    r.forEach(function (c, i) { if (i === hi || c === '' || c == null) return; h += '<div class="kv"><span>' + esc(heads[i]) + '</span><span>' + esc(c) + '</span></div>'; });
+    h += '</div>';
+  });
+  return h + '</div>';
+}
+function tblT(heads, rows, meta) {
   meta = meta || {}; lastTbl = { heads: heads, rows: rows };
   var h = '<div class="tw"><table><thead><tr>' + heads.map(function (x, i) { return '<th class="' + (meta.t && meta.t.indexOf(i) >= 0 ? 't' : '') + '">' + esc(x) + '</th>'; }).join('') + '</tr></thead><tbody>';
   rows.forEach(function (r, ri) {
@@ -248,22 +261,37 @@ function renderWarn() {
 function dateNav() {
   return '<div class="row nopr"><button class="btn small quiet fix" data-act="prev">‹</button><input type="date" id="dsel" value="' + ui.date + '"><button class="btn small quiet fix" data-act="next">›</button><button class="btn small quiet fix" data-act="today">Today 今天</button></div>';
 }
-function scBlock(x, after) {
-  var A = after, L = [['Cash Sales 现金销售', A ? x.cashA : x.cash, A && x.cashA !== x.cash], ['Misc Charges 杂项费用', A ? x.miscA : x.misc, A && x.miscA !== x.misc], ['Other Charges 其他费用', x.other], ['Amount 金额<br>(Cash - Misc - Other)', A ? x.amountA : x.amount], ['Credit Collection 赊账收款', x.E], ['Amount 2 金额2<br>(Amount + Credit Coll)', A ? x.amount2A : x.amount2], ['', null], ['b/f petty cash 上日备用金', x.bf]];
-  var R = [['c/f petty cash 今日备用金', A ? x.cfA : x.cf, A && x.cfA !== x.cf], ['cash collection 现金收款', x.hc], ['Cheque Collection 支票收款', x.cr], ['TNG collection TNG收款', x.tng], ['Advance Salary_M 预支M', x.am], ['Advance Salary_H 预支H', x.ah], ['', null], ['', null]];
-  var h = '<div class="tw"><table class="sc"><tbody>';
-  for (var k = 0; k < 8; k++) {
-    var a = L[k], b = R[k];
-    h += '<tr><td class="lb">' + a[0] + '</td><td class="v' + (a[2] ? ' chg' : '') + '">' + (a[1] == null ? '' : fm(a[1])) + '</td><td class="lb">' + b[0] + '</td><td class="v' + (b[2] ? ' chg' : '') + '">' + (b[1] == null ? '' : fm(b[1])) + '</td></tr>';
-  }
-  h += '<tr class="tt"><td class="lb">' + (A ? 'Total (C) 总计C' : 'Total (A) 总计A') + '</td><td class="v">' + fm(A ? x.totalCA : x.totalC) + '</td><td class="lb">' + (A ? 'Total (D) 总计D' : 'Total (B) 总计B') + '</td><td class="v">' + fm(A ? x.totalDA : x.totalD) + '</td></tr>';
-  var dif = A ? x.diffA : x.diff, bad = !A && ST[x.st][1] === 'bad';
-  h += '<tr class="df' + (bad ? ' bad' : '') + '"><td colspan="4" class="t"><b>Different 差额: ' + fm(dif) + '</b> &nbsp; ' + (A ? 'Tied 平衡' : esc(ST[x.st][0])) + '</td></tr></tbody></table></div>';
-  return h;
+function scList(x) {
+  function row(l, v, note, cls) { return '<tr class="' + (cls || '') + '"><td class="lb">' + l + (note ? '<small>' + note + '</small>' : '') + '</td><td class="v">' + fm(v) + '</td></tr>'; }
+  var ch = function (a, b) { return a !== b ? 'keyed 输入: ' + fm(b) : ''; };
+  var st = ST[x.st], bad = st[1] === 'bad';
+  return '<div class="tw"><table class="sc1"><tbody>' +
+    row('Cash Sales 现金销售', x.cashA, ch(x.cashA, x.cash)) + row('Misc Charges 杂项费用', x.miscA, ch(x.miscA, x.misc)) + row('Other Charges 其他费用', x.other) +
+    row('Amount 金额 (Cash - Misc - Other)', x.amountA) + row('Credit Collection 赊账收款', x.E) + row('Amount 2 金额2 = Daily sale 每日销售', x.amount2A, '', 'sb') +
+    row('b/f petty cash 上日备用金', x.bf) + row('Total (C) 总计C', x.totalCA, '', 'tt') +
+    row('c/f petty cash 今日备用金', x.cfA, ch(x.cfA, x.cf)) + row('cash collection 现金收款', x.hc) + row('Cheque Collection 支票收款', x.cr) + row('TNG collection TNG收款', x.tng) +
+    row('Advance Salary_M 预支M', x.am) + row('Advance Salary_H 预支H', x.ah) + row('Total (D) 总计D', x.totalDA, '', 'tt') +
+    '<tr class="df' + (bad ? ' bad' : '') + '"><td colspan="2"><b>Different 差额 (as keyed 输入时): ' + fm(x.diff) + '</b><br>' + esc(st[0]) + '</td></tr></tbody></table></div>';
+}
+function scStack(x, A) {
+  var cash = A ? x.cashA : x.cash, misc = A ? x.miscA : x.misc, am = A ? x.amountA : x.amount, a2 = A ? x.amount2A : x.amount2, tc = A ? x.totalCA : x.totalC, cf = A ? x.cfA : x.cf, td = A ? x.totalDA : x.totalD, df = A ? x.diffA : x.diff;
+  var ch = function (a, b) { return A && a !== b ? 'pos' : ''; };
+  var dd = x.date.split('-'), dtx = dd[2] + '.' + dd[1] + '.' + dd[0];
+  var bad = !A && ST[x.st][1] === 'bad';
+  return '<div class="mh">' + (A ? 'After 调整后 (After)' : 'Before 调整前') + ' &nbsp; ' + dtx + '</div>' +
+    kv('Cash Sales 现金销售', fm(cash), ch(cash, x.cash)) + kv('Misc Charges 杂项费用', fm(misc), ch(misc, x.misc)) + kv('Other Charges 其他费用', fm(x.other)) +
+    kv('Amount 金额 (Cash Sales - Misc - Other)', fm(am)) + kv('Credit Collection 赊账收款', fm(x.E)) + kv('Amount 2 金额2 (Amount + Credit Collection)', fm(a2)) +
+    kv('b/f petty cash 上日备用金结转', fm(x.bf)) + '<div class="kv" style="font-weight:800;border-top:2px solid var(--line);padding-top:4px"><span>Total (' + (A ? 'C' : 'A') + ') 总计</span><span>' + fm(tc) + '</span></div>' +
+    '<p class="hint">Total = Amount 2 + b/f petty cash (金额2 + 上日备用金)</p><div style="height:6px"></div>' +
+    kv('c/f petty cash 今日备用金结转', fm(cf), ch(cf, x.cf)) + kv('cash collection 现金收款', fm(x.hc)) + kv('Cheque Collection 支票收款', fm(x.cr)) + kv('TNG collection TNG收款', fm(x.tng)) +
+    kv('Advance Salary_M 预支薪水_M', fm(x.am)) + kv('Advance Salary_H 预支薪水_H', fm(x.ah)) +
+    '<div class="chk ' + (bad ? 'bad' : '') + '"><span class="big">Different 差额: ' + fm(df) + '</span><span>' + (A ? 'Tied 平衡' : esc(ST[x.st][0])) + '</span></div>' +
+    '<div class="kv" style="font-weight:800;border-top:2px solid var(--line);padding-top:4px"><span>Total (' + (A ? 'D' : 'B') + ') 总计</span><span>' + fm(td) + '</span></div>';
 }
 function liveHTML(d) {
-  var x = C.byDate[d.date]; if (!x) return { chk: '', sum: '', hint: '' };
-  var chk = '<div class="mh">Sales &amp; Collection 销售与收款 - ' + fd(x.date) + '</div>' + scBlock(x, false) + '<div class="mh">After 调整后</div>' + scBlock(x, true);
+  var x = C.byDate[d.date]; if (!x) return { chk: '', chk2: '', sum: '', hint: '' };
+  var chk = '<div class="mh">Sales &amp; Collection 销售与收款</div>' + scStack(x, true);
+  var chk2 = scStack(x, false);
   var sum = '<div class="mh">Position 结余</div>' + kv('Daily sale 每日销售', fm(x.dailySale)) + kv('AR &amp; AP balance c/f', fm(x.arK)) + kv('Bank 银行', fm(x.bank)) + kv('Cheque in hand 手头支票', f0(x.chqU) + ' / ' + fm(x.chqRM)) +
     kv('Cash in hand 手头现金', fm(x.cashHand)) + kv('Loose cash 零散现金', fm(x.loose)) + kv('Advance salary 预支', fm(x.adv)) + kv('Total 总计', fm(x.total)) +
     '<div class="chk ' + (x.check !== 0 ? 'bad' : '') + '">Cash flow check 核对 (should be 0 应为0): <span class="big">' + fm(x.check) + '</span></div>';
@@ -271,7 +299,7 @@ function liveHTML(d) {
   var cash = U.sum(ce.filter(function (e) { return e.mode === 'cash'; }), function (e) { return e.amt; });
   var chq = ce.filter(function (e) { return e.mode === 'chq'; });
   var hint = 'Buyers paid cash today 买家现金: RM ' + fm(cash) + ' | Buyer cheques 买家支票: ' + chq.length + ' / RM ' + fm(U.sum(chq, function (e) { return e.amt; })) + ' | Credit collection 赊账收款 (auto 自动): RM ' + fm(x.E);
-  return { chk: chk, sum: sum, hint: hint };
+  return { chk: chk, chk2: chk2, sum: sum, hint: hint };
 }
 function vDay() {
   var d = SR.dayOf(ui.date), h = dateNav();
@@ -284,7 +312,7 @@ function vDay() {
       '<div class="card"><div class="mh">Collected today 今日收款 (include buyers 包括买家)</div><div class="row">' + fld('Cash collection 现金收款', 'data-f="hc"', d.hc) + fld('TNG 收款', 'data-f="tng"', d.tng) + '</div>' +
       '<div class="row">' + fld('Cheque (unit) 支票张数', 'data-f="cu"', d.cu) + fld('Cheque RM 支票金额', 'data-f="cr"', d.cr) + '</div><p class="hint" id="hint">' + esc(L.hint) + '</p></div>' +
       '<div class="card"><div class="mh">Advance salary 预支薪水</div><div class="row">' + fld('M', 'data-f="am"', d.am) + fld('H', 'data-f="ah"', d.ah) + '</div></div>' +
-      '<div class="card" id="chk">' + L.chk + '</div><div class="card" id="dsum">' + L.sum + '</div>';
+      '<div class="card" id="chk">' + L.chk + '</div><div class="card" id="chk2">' + L.chk2 + '</div><div class="card" id="dsum">' + L.sum + '</div>';
   }
   var de = S().deb.filter(function (e) { return e.date === ui.date; }), bk = S().bank.filter(function (b) { return b.date === ui.date; });
   h += '<div class="card"><div class="mh">Buyer entries 买家记录</div><div class="list">' + (de.length ? de.map(entRow).join('') : '<p class="hint">None yet 暂无</p>') + '</div>' +
@@ -307,7 +335,7 @@ function bankRow(b) {
 function bn(b) { return SR.bn(b); }
 function refreshLive() {
   var d = SR.dayOf(ui.date); if (!d) return; recalc();
-  var L = liveHTML(d); if ($('#chk')) $('#chk').innerHTML = L.chk; if ($('#dsum')) $('#dsum').innerHTML = L.sum; if ($('#hint')) $('#hint').textContent = L.hint;
+  var L = liveHTML(d); if ($('#chk')) $('#chk').innerHTML = L.chk; if ($('#chk2')) $('#chk2').innerHTML = L.chk2; if ($('#dsum')) $('#dsum').innerHTML = L.sum; if ($('#hint')) $('#hint').textContent = L.hint;
   renderWarn();
 }
 
@@ -329,7 +357,7 @@ function stmtSheet(id) {
     return [fd(i.date) + ' ' + (i.src === 'b' ? 'Online 网上' : i.type === 'credit' ? 'Credit sale 赊销' : (i.mode === 'chq' ? 'Cheque 支票' : 'Cash 现金')), i.debit ? fm(i.debit) : '', i.credit ? fm(i.credit) : '', i.disc ? fm(i.disc) : '', fm(i.bal)];
   }));
   var h = '<div class="mh">' + esc(bn(b)) + '</div><div class="chk ' + (s.bal > 0 ? 'bad' : '') + '"><span>Balance owing 欠款余额</span><span class="big">' + fm(s.bal) + '</span></div>' +
-    tbl(['Date 日期', 'Sale 赊销', 'Paid 付款', 'Disc 折扣', 'Balance 余额'], rows, { t: [0], go: 1, attr: function (ri) { var it = ri > 0 ? its[ri - 1] : null; return it && it.src === 'e' ? 'data-ent="' + it.id + '"' : (it ? 'data-bnk="' + it.id + '"' : ''); } }) +
+    tbl(['Date 日期', 'Sale 赊销', 'Paid 付款', 'Disc 折扣', 'Balance 余额'], rows, { tab: 1, t: [0], go: 1, attr: function (ri) { var it = ri > 0 ? its[ri - 1] : null; return it && it.src === 'e' ? 'data-ent="' + it.id + '"' : (it ? 'data-bnk="' + it.id + '"' : ''); } }) +
     '<div class="row"><button class="btn small" data-act="newdeb:credit:' + id + '">＋ Credit sale 赊销</button><button class="btn small" data-act="newdeb:coll:' + id + '">＋ Collection 收款</button></div>' +
     '<div class="row"><button class="btn small quiet" data-act="editbuyer:' + id + '">Edit buyer 修改买家</button><button class="btn small quiet" data-act="close">Close 关闭</button></div>';
   openSheet(h);
@@ -385,20 +413,21 @@ function bankSheet() {
 function err(m) { var e = $('#emsg'); if (e) e.textContent = m; }
 
 /* ---------- Reports ---------- */
-var REPS = [['sc', 'Sales & Collection 销售收款'], ['daily', 'Daily table 每日表'], ['flow', 'Cash flow 现金流'], ['ar', 'AR &amp; AP'], ['debt', 'Debtors 债务人'], ['dd', 'Debtor daily 每日债务'], ['bank', 'Bank 银行'], ['chq', 'Cheques 支票']];
+var REPS = [['daily', 'Sales & Collection 每日'], ['flow', 'Cash flow 现金流'], ['ar', 'AR &amp; AP'], ['debt', 'Debtors 债务人'], ['dd', 'Debtor daily 每日债务'], ['bank', 'Bank 银行'], ['chq', 'Cheques 支票']];
 var REPNAME = { sc: 'Sales & Collection 每日销售与收款', daily: 'Sales & Collection 每日销售与收款', flow: 'Cash flow 现金流', ar: 'AR & AP', debt: 'Debtor summary 债务人总表', dd: 'Debtor daily 债务人每日明细', bank: 'Bank statement 银行记录', chq: 'Cheque on hand 手头支票' };
 function vReports() {
   var h = '<div class="seg sc nopr">' + REPS.map(function (r) { return '<button data-rep="' + r[0] + '" class="' + (ui.rep === r[0] ? 'on' : '') + '">' + r[1] + '</button>'; }).join('') + '</div>' +
     '<div class="pronly"><h2>' + REPNAME[ui.rep] + '</h2></div>';
   var days = C.days, R = [];
-  if (ui.rep === 'sc') {
-    if (!days.length) h += '<p class="hint">No days yet 还没有记录</p>';
-    days.slice().reverse().forEach(function (x) { h += '<div class="card" data-go="' + x.date + '" style="break-inside:avoid"><div class="mh">Date 日期: ' + fd(x.date) + '</div>' + scBlock(x, false) + '<div class="mh">After 调整后</div>' + scBlock(x, true) + '</div>'; });
-    h += '<p class="hint nopr">Newest first. Tap a day to open it 最新在上,点一天打开.</p>';
-  } else if (ui.rep === 'daily') {
-    days.forEach(function (x) { R.push([fd(x.date), fm(x.cash), fm(x.misc), fm(x.other), fm(x.E), fm(x.dailySale), fm(x.bf), fm(x.totalC), fm(x.cf), fm(x.hc), fm(x.cr), fm(x.tng), fm(x.am + x.ah), fm(x.totalD), fm(x.diff), ST[x.st][0].split(' - ')[0]]); });
-    h += tbl(['Date 日期', 'Cash sales', 'Misc', 'Other', 'Credit coll', 'Daily sale', 'b/f petty', 'Total A', 'c/f petty', 'Cash coll', 'Cheque', 'TNG', 'Advance', 'Total B', 'Different', 'Status'], R, { go: 1, t: [15], attr: function (i) { return 'data-go="' + days[i].date + '"'; }, bad: function (i) { return days[i].st === 'alert'; } });
-    h += '<p class="hint nopr">Tap a row to open that day 点一行打开当天. Daily sale = after balancing 调整后.</p>';
+  if (ui.rep === 'daily') {
+    var A = ui.after !== false;
+    h += '<div class="seg nopr"><button data-aft="1" class="' + (A ? 'on' : '') + '">After 调整后</button><button data-aft="0" class="' + (!A ? 'on' : '') + '">Before 调整前</button></div>';
+    days.forEach(function (x) {
+      R.push([fd(x.date), fm(A ? x.cashA : x.cash), fm(A ? x.miscA : x.misc), fm(x.other), fm(A ? x.amountA : x.amount), fm(x.E), fm(A ? x.amount2A : x.amount2), fm(x.bf), fm(A ? x.totalCA : x.totalC),
+        fm(A ? x.cfA : x.cf), fm(x.hc), fm(x.cr), fm(x.tng), fm(x.am), fm(x.ah), fm(A ? x.totalDA : x.totalD), fm(x.diff), ST[x.st][0].split(' - ')[0]]);
+    });
+    h += tbl(['Date 日期', 'Cash Sales 现金销售', 'Misc Charges 杂项', 'Other Charges 其他', 'Amount 金额', 'Credit Collection 赊账收款', 'Amount 2 金额2', 'b/f petty cash 上日备用金', A ? 'Total (C)' : 'Total (A)', 'c/f petty cash 今日备用金', 'Cash collection 现金收款', 'Cheque Collection 支票收款', 'TNG', 'Advance M', 'Advance H', A ? 'Total (D)' : 'Total (B)', 'Different 差额(调整前)', 'Status'], R, { go: 1, t: [17], attr: function (i) { return 'data-go="' + days[i].date + '"'; }, bad: function (i) { return days[i].st === 'alert'; } });
+    h += '<p class="hint nopr">Tap a row to open that day 点一行打开当天.</p>';
   } else if (ui.rep === 'flow') {
     days.forEach(function (x) { R.push([fd(x.date), fm(x.bank), f0(x.chqU), fm(x.chqRM), fm(x.petty), fm(x.adv), fm(x.loose), fm(x.cashHand), fm(x.total), fm(x.arK), fm(x.check)]); });
     h += tbl(['Date 日期', 'Bank 银行', 'Chq unit', 'Chq RM', 'Petty', 'Advance', 'Loose cash', 'Cash in hand', 'Total', 'AR&AP', 'Check'], R, { go: 1, attr: function (i) { return 'data-go="' + days[i].date + '"'; }, bad: function (i) { return days[i].check !== 0; } });
@@ -440,7 +469,7 @@ function vReports() {
     if (list.length) R.push(['', '', list.length + ' cheques 张', fm(U.sum(list, function (e) { return e.amt; })), '']);
     h += list.length ? tbl(['No', 'Received 收到', 'Buyer 买家', 'Amount 金额', 'Remarks'], R, { t: [2, 4], go: 1, tot: 1, attr: function (i) { return list[i] ? 'data-ent="' + list[i].id + '"' : ''; } }) + '<p class="hint nopr">Tap a cheque and fill the Bank-in date when you bank it in 存入银行后点支票填写存入日期.</p>' : '<p class="hint">No cheques on hand 没有手头支票</p>';
   }
-  if (ui.rep !== 'sc' && (days.length || ui.rep === 'debt' || ui.rep === 'chq')) h += '<div class="row nopr"><button class="btn quiet" data-act="print">Print / PDF 打印</button><button class="btn quiet" data-act="csv">Download CSV 下载</button></div><div class="nopr"><button class="btn main" data-act="xlsx">Export to Excel 导出Excel</button><p class="msg" id="xmsg"></p></div>';
+  if (days.length || ui.rep === 'debt' || ui.rep === 'chq') h += '<div class="row nopr"><button class="btn quiet" data-act="print">Print / PDF 打印</button><button class="btn quiet" data-act="csv">Download CSV 下载</button></div><div class="nopr"><button class="btn main" data-act="xlsx">Export to Excel 导出Excel</button><p class="msg" id="xmsg"></p></div>';
   return h;
 }
 
@@ -560,7 +589,7 @@ function act(a, el) {
 document.addEventListener('click', function (ev) {
   var t = ev.target;
   if (t.id === 'sheet') { closeSheet(); return; }
-  var el = t.closest ? t.closest('[data-act],[data-v],[data-es],[data-pick],[data-newb],[data-ent],[data-bnk],[data-stmt],[data-rep],[data-go],[data-drop]') : null; if (!el) return;
+  var el = t.closest ? t.closest('[data-act],[data-v],[data-es],[data-pick],[data-newb],[data-ent],[data-bnk],[data-stmt],[data-rep],[data-go],[data-drop],[data-aft]') : null; if (!el) return;
   if (el.hasAttribute('data-act')) return act(el.getAttribute('data-act'), el);
   if (el.hasAttribute('data-v')) return go(el.getAttribute('data-v'));
   if (el.hasAttribute('data-es')) { var kv2 = el.getAttribute('data-es').split(':'); cur[kv2[0]] = kv2[1]; return debSheet(); }
@@ -571,6 +600,7 @@ document.addEventListener('click', function (ev) {
   if (el.hasAttribute('data-stmt')) return stmtSheet(el.getAttribute('data-stmt'));
   if (el.hasAttribute('data-rep')) { ui.rep = el.getAttribute('data-rep'); return render(); }
   if (el.hasAttribute('data-go')) { ui.date = el.getAttribute('data-go'); return go('day'); }
+  if (el.hasAttribute('data-aft')) { ui.after = el.getAttribute('data-aft') === '1'; return render(); }
   if (el.hasAttribute('data-drop')) { S().ob.drop = +el.getAttribute('data-drop'); save(); return render(); }
 });
 document.addEventListener('input', function (ev) {
